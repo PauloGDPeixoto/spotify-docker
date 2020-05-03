@@ -1,0 +1,15 @@
+FROM ubuntu
+
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG AUDIO_GID=63
+
+RUN groupmod --gid ${AUDIO_GID} audio && groupadd -g ${USER_GID} usergroup && useradd -m -l -u ${USER_UID} --gid ${USER_GID} --groups audio user
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y --no-install-recommends curl gnupg2 pulseaudio ca-certificates
+RUN curl -sS https://download.spotify.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb http://repository.spotify.com stable non-free" | tee /etc/apt/sources.list.d/spotify.list
+RUN ln -fs /usr/share/zoneinfo/Europe/Lisbon /etc/localtime
+RUN DEBIAN_FRONTEND=noninteractive apt update && apt install -y --no-install-recommends spotify-client
+
+CMD ["/usr/bin/spotify"]
+
